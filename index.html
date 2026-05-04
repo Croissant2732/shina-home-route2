@@ -6,8 +6,17 @@
     <title>帰宅ナビ</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 10px; color: #333; margin: 0; }
-        h2 { font-size: 18px; margin: 15px 0 15px 5px; font-weight: bold; }
         
+        /* ヘッダーエリア：タイトルと時計を横並びに */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin: 10px 5px 15px 5px; 
+        }
+        h2 { font-size: 18px; margin: 0; font-weight: bold; }
+        #clock { font-family: monospace; font-size: 16px; font-weight: bold; color: #555; background: #fff; padding: 4px 8px; border-radius: 6px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+
         #result { display: flex; flex-direction: column; gap: 12px; }
 
         .card { 
@@ -18,7 +27,6 @@
             border-left: 8px solid #ccc; 
         }
 
-        /* 品川側：路線別カラー */
         .card.yamanote { border-left-color: #9acd32; background-color: #f9fff0; }
         .card.keihintohoku { border-left-color: #00bfff; background-color: #f0faff; }
 
@@ -47,37 +55,43 @@
             font-weight: bold; 
         }
         
-        .station-name { font-size: 12px; color: #666; font-weight: normal; }
+        .station-name { font-size: 11px; color: #666; font-weight: normal; }
         .arrow { color: #bbb; }
 
-        /* ★武蔵野線エリア：オレンジ設定★ */
         .musashino-section { 
             display: flex; 
-            gap: 10px; 
+            gap: 8px; 
             border-top: 1px solid rgba(0,0,0,0.05); 
             padding-top: 10px; 
         }
         .musashino-box { 
             flex: 1; 
-            background: #fff5e6; /* 薄い橙色 */
+            background: #fff5e6; 
             border-radius: 8px; 
-            padding: 8px; 
-            border: 1px solid #ffcc80; /* 少し濃い橙の枠線 */
+            padding: 6px; 
+            border: 1px solid #ffcc80; 
             text-align: center; 
         }
-        .wait-label { font-size: 11px; color: #845c2e; display: block; margin-bottom: 2px; }
-        .musashino-time { font-size: 17px; font-weight: bold; color: #e65100; } /* オレンジ系の濃い文字色 */
-        .dest-label { font-size: 11px; color: #845c2e; }
+        .wait-label { font-size: 10px; color: #845c2e; display: block; margin-bottom: 2px; }
+        .musashino-time { font-size: 16px; font-weight: bold; color: #e65100; }
+        .dest-label { font-size: 10px; color: #845c2e; display: block; }
 
         .info-msg { text-align: center; color: #888; margin-top: 30px; }
     </style>
 </head>
 <body>
 
-<h2>帰宅経路案内</h2>
+<div class="header">
+    <h2>帰宅経路案内</h2>
+    <div id="clock">00:00:00</div>
+</div>
+
 <div id="result">読み込み中...</div>
 
 <script>
+let shinagawaData = [];
+let tokyoData = [];
+
 async function loadCSV(file) {
     try {
         const response = await fetch(file);
@@ -92,20 +106,25 @@ function timeToMin(timeStr) {
     return h * 60 + m;
 }
 
-async function init() {
-    const sData = await loadCSV('shinagawa_yurakucho.csv');
-    const tData = await loadCSV('tokyo_musashino.csv');
-    
+function updateDisplay() {
     const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    
+    // 右上の時計を更新
+    document.getElementById('clock').innerText = `${h}:${m}:${s}`;
+
     const nowMin = now.getHours() * 60 + now.getMinutes();
 
-    const nextS = sData.filter(r => timeToMin(r[1]) >= nowMin).slice(0, 3);
+    // 5本表示に増量
+    const nextS = shinagawaData.filter(r => timeToMin(r[1]) >= nowMin).slice(0, 5);
 
     let html = '';
     nextS.forEach(sRow => {
         const [lineName, sDep, yArr] = sRow;
         const yArrMin = timeToMin(yArr);
-        const nextT = tData.filter(r => timeToMin(r[0]) >= yArrMin).slice(0, 2);
+        const nextT = tokyoData.filter(r => timeToMin(r[0]) >= yArrMin).slice(0, 2);
 
         let lineClass = '';
         if (lineName.includes('山手')) lineClass = 'yamanote';
@@ -132,11 +151,22 @@ async function init() {
                     </div>`;
                 }).join('')}
                 ${nextT.length === 1 ? '<div style="flex:1"></div>' : ''}
+                ${nextT.length === 0 ? '<div class="musashino-box" style="background:#eee; border:none; color:#999;">接続なし</div>' : ''}
             </div>
         </div>`;
     });
 
-    document.getElementById('result').innerHTML = html || '<div class="info-msg">電車がありません</div>';
+    document.getElementById('result').innerHTML = html || '<div class="info-msg">本日の運行は終了しました</div>';
+}
+
+async function init() {
+    // 最初に一度だけデータをロード
+    shinagawaData = await loadCSV('shinagawa_yurakucho.csv');
+    tokyoData = await loadCSV('tokyo_musashino.csv');
+    
+    // 1秒ごとに時計と表示内容を更新
+    setInterval(updateDisplay, 1000);
+    updateDisplay(); // 初回実行
 }
 
 init();
