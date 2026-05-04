@@ -10,7 +10,6 @@
         
         #result { display: flex; flex-direction: column; gap: 12px; }
 
-        /* カード基本設定 */
         .card { 
             background: white; 
             border-radius: 12px; 
@@ -19,15 +18,13 @@
             border-left: 8px solid #ccc; 
         }
 
-        /* ★路線別の色設定★ */
-        .card.yamanote { border-left-color: #9acd32; background-color: #f9fff0; } /* 薄い緑背景 */
-        .card.keihintohoku { border-left-color: #00bfff; background-color: #f0faff; } /* 薄い青背景 */
+        /* 品川側：路線別カラー */
+        .card.yamanote { border-left-color: #9acd32; background-color: #f9fff0; }
+        .card.keihintohoku { border-left-color: #00bfff; background-color: #f0faff; }
 
-        /* 品川→有楽町（横一行レイアウト） */
         .route-main { 
             display: flex; 
             align-items: center; 
-            justify-content: flex-start; 
             gap: 12px;
             margin-bottom: 12px; 
         }
@@ -50,15 +47,27 @@
             font-weight: bold; 
         }
         
-        .station-name { font-size: 12px; color: #666; font-weight: normal; margin-right: 2px; }
-        .arrow { color: #bbb; font-weight: normal; }
+        .station-name { font-size: 12px; color: #666; font-weight: normal; }
+        .arrow { color: #bbb; }
 
-        /* 武蔵野線エリア */
-        .musashino-section { display: flex; gap: 10px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px; }
-        .musashino-box { flex: 1; background: white; border-radius: 8px; padding: 8px; border: 1px solid #eee; text-align: center; }
-        .wait-label { font-size: 11px; color: #666; display: block; margin-bottom: 2px; }
-        .musashino-time { font-size: 17px; font-weight: bold; color: #007bff; }
-        .dest-label { font-size: 11px; color: #666; }
+        /* ★武蔵野線エリア：オレンジ設定★ */
+        .musashino-section { 
+            display: flex; 
+            gap: 10px; 
+            border-top: 1px solid rgba(0,0,0,0.05); 
+            padding-top: 10px; 
+        }
+        .musashino-box { 
+            flex: 1; 
+            background: #fff5e6; /* 薄い橙色 */
+            border-radius: 8px; 
+            padding: 8px; 
+            border: 1px solid #ffcc80; /* 少し濃い橙の枠線 */
+            text-align: center; 
+        }
+        .wait-label { font-size: 11px; color: #845c2e; display: block; margin-bottom: 2px; }
+        .musashino-time { font-size: 17px; font-weight: bold; color: #e65100; } /* オレンジ系の濃い文字色 */
+        .dest-label { font-size: 11px; color: #845c2e; }
 
         .info-msg { text-align: center; color: #888; margin-top: 30px; }
     </style>
@@ -98,7 +107,6 @@ async function init() {
         const yArrMin = timeToMin(yArr);
         const nextT = tData.filter(r => timeToMin(r[0]) >= yArrMin).slice(0, 2);
 
-        // クラス判定
         let lineClass = '';
         if (lineName.includes('山手')) lineClass = 'yamanote';
         if (lineName.includes('京浜東北')) lineClass = 'keihintohoku';
@@ -123,6 +131,7 @@ async function init() {
                         <span class="dest-label">${tRow[1]}行</span>
                     </div>`;
                 }).join('')}
+                ${nextT.length === 1 ? '<div style="flex:1"></div>' : ''}
             </div>
         </div>`;
     });
