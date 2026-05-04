@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿待ち時間を「黒色・太字」にする修正を行いました。
+オレンジ色の背景の中でもパッと目に飛び込んでくるようになり、乗り換えの余裕が直感的に判断しやすくなるはずです。
+
+index.html の該当箇所（スタイルとHTML生成部分）を修正したコードがこちらです。
+
+修正後の index.html（待ち時間強調版）
+HTML
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +14,6 @@
     <style>
         body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 10px; color: #333; margin: 0; }
         
-        /* ヘッダーエリア：タイトルと時計を横並びに */
         .header { 
             display: flex; 
             justify-content: space-between; 
@@ -72,7 +78,11 @@
             border: 1px solid #ffcc80; 
             text-align: center; 
         }
-        .wait-label { font-size: 10px; color: #845c2e; display: block; margin-bottom: 2px; }
+
+        /* ★待ち時間のスタイル修正：黒色・太字★ */
+        .wait-label { font-size: 10px; color: #666; display: block; margin-bottom: 2px; }
+        .wait-time-bold { color: #000; font-weight: bold; font-size: 12px; }
+
         .musashino-time { font-size: 16px; font-weight: bold; color: #e65100; }
         .dest-label { font-size: 10px; color: #845c2e; display: block; }
 
@@ -112,12 +122,9 @@ function updateDisplay() {
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
     
-    // 右上の時計を更新
     document.getElementById('clock').innerText = `${h}:${m}:${s}`;
 
     const nowMin = now.getHours() * 60 + now.getMinutes();
-
-    // 5本表示に増量
     const nextS = shinagawaData.filter(r => timeToMin(r[1]) >= nowMin).slice(0, 5);
 
     let html = '';
@@ -145,7 +152,7 @@ function updateDisplay() {
                     const wait = timeToMin(tRow[0]) - yArrMin;
                     return `
                     <div class="musashino-box">
-                        <span class="wait-label">東京${idx+1} (${wait}分)</span>
+                        <span class="wait-label">東京${idx+1} <span class="wait-time-bold">(${wait}分)</span></span>
                         <span class="musashino-time">${tRow[0]}</span>
                         <span class="dest-label">${tRow[1]}行</span>
                     </div>`;
@@ -160,13 +167,10 @@ function updateDisplay() {
 }
 
 async function init() {
-    // 最初に一度だけデータをロード
     shinagawaData = await loadCSV('shinagawa_yurakucho.csv');
     tokyoData = await loadCSV('tokyo_musashino.csv');
-    
-    // 1秒ごとに時計と表示内容を更新
     setInterval(updateDisplay, 1000);
-    updateDisplay(); // 初回実行
+    updateDisplay();
 }
 
 init();
