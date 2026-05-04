@@ -1,235 +1,140 @@
-﻿<!DOCTYPE html>
+﻿申し訳ありません！レイアウトを整えようとして、意図せず縦並びにしてしまいましたね。
+ご希望通り、「時刻を横一行（XX:XX → XX:XX）に表示する」形に戻しつつ、路線の色分けを維持した修正版です。
+
+このコードを index.html に上書きしてください。
+
+修正後の index.html（横並び復活版）
+HTML
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>帰宅ナビ</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; padding: 10px; color: #333; margin: 0; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 10px; color: #333; margin: 0; }
         h2 { font-size: 18px; margin: 15px 0 15px 5px; font-weight: bold; }
         
         #result { display: flex; flex-direction: column; gap: 12px; }
 
-        /* カードの基本スタイル */
+        /* カード基本設定 */
         .card { 
             background: white; 
             border-radius: 12px; 
             padding: 15px; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-            border-left: 5px solid #ccc; /* デフォルトの左端の線 */
-            transition: transform 0.1s;
-        }
-        .card:active { transform: scale(0.98); } /* タップ時のフィードバック */
-
-        /* 品川→有楽町エリア */
-        .route-main { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
-        
-        /* 路線名タグの基本スタイル */
-        .line-tag { 
-            color: white; 
-            padding: 3px 8px; 
-            border-radius: 4px; 
-            font-size: 11px; 
-            font-weight: bold; 
-            background: #666; /* デフォルト背景 */
-        }
-
-        /* ★路線別の色定義★ */
-        /* 山手線（薄い緑 -> ウグイス色） */
-        .card.yamanote { border-left-color: #9acd32; }
-        .card.yamanote .line-tag { background-color: #9acd32; color: #111; } /* 文字を少し濃く */
-
-        /* 京浜東北線（薄い青 -> スカイブルー） */
-        .card.keihintohoku { border-left-color: #00bfff; }
-        .card.keihintohoku .line-tag { background-color: #00bfff; color: white; }
-
-        .time-display { font-weight: bold; font-size: 19px; letter-spacing: -0.5px; }
-        .dep-label { font-size: 10px; color: #888; display: block; }
-        .arrow { color: #ddd; font-size: 18px; }
-
-        /* 武蔵野線エリア */
-        .musashino-section { display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px; }
-        .musashino-box { flex: 1; background: #f8f9fa; border-radius: 8px; padding: 8px; border: 1px solid #eee; }
-        .wait-label { font-size: 11px; color: #666; display: block; margin-bottom: 3px; }
-        .musashino-time { font-size: 17px; font-weight: bold; color: #007bff; }
-        .dest-label { font-size: 11px; color: #666; margin-left: 3px; }
-
-        .no-train { text-align: center; color: #888; margin-top: 20px; }
-        .error-msg { text-align: center; color: red; margin-top: 20px; }
-    </style>
-</head>
-<body>
-
-<h2>帰宅経路案内</h2>
-<div id="result">データを読み込み中...うごいて良かったです！
-それは素晴らしいアイデアですね。「山手線」か「京浜東北線」かが一目で分かると、品川駅のホームでどちらの列車の列に並ぶべきか瞬時に判断できます。
-
-修正案を作成しました。
-単に文字の背景色を変えるだけでなく、**カード全体の左側の線（境界線）の色**もそれぞれのラインカラーに合わせることで、視認性をさらに高めています。
-
-`index.html` の内容を、以下のコードですべて差し替えてください。CSVファイルはそのままで大丈夫です。
-
----
-
-### 修正後の `index.html`
-```html
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>帰宅ナビ（品川→船橋法典）</title>
-    <style>
-        /* ベーススタイル */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; padding: 10px; color: #333; margin: 0; }
-        h2 { font-size: 18px; margin: 15px 0 15px 5px; font-weight: bold; text-align: center; }
-        
-        /* 結果表示エリア（カードの間隔） */
-        #result { display: flex; flex-direction: column; gap: 12px; }
-
-        /* カードの基本スタイル */
-        .card { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 15px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-            border-left: 6px solid #ccc; /* デフォルトの左端の線 */
+            border-left: 8px solid #ccc; 
         }
 
         /* ★路線別の色設定★ */
-        /* 山手線（ウグイス色） */
-        .card.yamanote { border-left-color: #9acd32; }
-        .card.yamanote .line-tag { background-color: #eaf6d5; color: #558b2f; border: 1px solid #9acd32; }
+        .card.yamanote { border-left-color: #9acd32; background-color: #f9fff0; } /* 薄い緑背景 */
+        .card.keihintohoku { border-left-color: #00bfff; background-color: #f0faff; } /* 薄い青背景 */
 
-        /* 京浜東北線（スカイブルー） */
-        .card.keihintohoku { border-left-color: #00bfff; }
-        .card.keihintohoku .line-tag { background-color: #e0f7fa; color: #0277bd; border: 1px solid #00bfff; }
-
-        /* 品川→有楽町エリア */
-        .route-main { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        /* 品川→有楽町（横一行レイアウト） */
+        .route-main { 
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-start; 
+            gap: 12px;
+            margin-bottom: 12px; 
+        }
         
-        /* 路線名タグのスタイル */
         .line-tag { 
-            padding: 3px 8px; 
+            padding: 2px 8px; 
             border-radius: 4px; 
             font-size: 11px; 
             font-weight: bold; 
+            background: #333;
+            color: white;
+            white-space: nowrap;
         }
 
-        .time-group { display: flex; align-items: center; gap: 10px; }
-        .time-box { text-align: center; }
-        .time-label { font-size: 10px; color: #888; display: block; margin-bottom: -2px; }
-        .time-display { font-weight: bold; font-size: 20px; letter-spacing: -0.5px; }
-        .arrow { color: #ddd; font-size: 18px; font-weight: 100; }
+        .time-row { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 19px; 
+            font-weight: bold; 
+        }
+        
+        .station-name { font-size: 12px; color: #666; font-weight: normal; margin-right: 2px; }
+        .arrow { color: #bbb; font-weight: normal; }
 
         /* 武蔵野線エリア */
-        .musashino-section { display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px; }
-        .musashino-box { flex: 1; background: #f8f9fa; border-radius: 8px; padding: 8px; border: 1px solid #eee; text-align: center;}
+        .musashino-section { display: flex; gap: 10px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px; }
+        .musashino-box { flex: 1; background: white; border-radius: 8px; padding: 8px; border: 1px solid #eee; text-align: center; }
         .wait-label { font-size: 11px; color: #666; display: block; margin-bottom: 2px; }
-        .wait-min { font-weight: bold; color: #333; }
-        .musashino-time { font-size: 18px; font-weight: bold; color: #007bff; display: block; }
+        .musashino-time { font-size: 17px; font-weight: bold; color: #007bff; }
         .dest-label { font-size: 11px; color: #666; }
 
-        /* エラー・案内メッセージ */
-        .info-msg { text-align: center; color: #888; margin-top: 30px; font-size: 14px; }
+        .info-msg { text-align: center; color: #888; margin-top: 30px; }
     </style>
 </head>
 <body>
 
 <h2>帰宅経路案内</h2>
-<div id="result">データを読み込み中...</div>
+<div id="result">読み込み中...</div>
 
 <script>
 async function loadCSV(file) {
     try {
         const response = await fetch(file);
-        if (!response.ok) throw new Error();
         const text = await response.text();
         return text.trim().split('\n').slice(1).map(row => row.split(','));
-    } catch (e) {
-        console.error(`Failed to load ${file}`);
-        return [];
-    }
+    } catch (e) { return []; }
 }
 
 function timeToMin(timeStr) {
-    if(!timeStr || !timeStr.includes(':')) return 0;
+    if(!timeStr) return 0;
     const [h, m] = timeStr.split(':').map(Number);
     return h * 60 + m;
-}
-
-// 路線名に応じたCSSクラスを返す関数
-function getLineClass(lineName) {
-    if (!lineName) return '';
-    if (lineName.includes('山手')) return 'yamanote';
-    if (lineName.includes('京浜東北')) return 'keihintohoku';
-    return '';
 }
 
 async function init() {
     const sData = await loadCSV('shinagawa_yurakucho.csv');
     const tData = await loadCSV('tokyo_musashino.csv');
     
-    if (sData.length === 0 || tData.length === 0) {
-        document.getElementById('result').innerHTML = '<div class="info-msg">CSVファイルの読み込みに失敗したか、<br>データが空です。</div>';
-        return;
-    }
-    
-    // 開発中のテスト用: 時刻を18:00に固定したい場合はここを書き換える
     const now = new Date();
-    // const now = new Date('2023-10-27T18:00:00'); 
     const nowMin = now.getHours() * 60 + now.getMinutes();
 
-    // 品川発が現在時刻以降のものを3つ抽出
-    const nextS = sData
-        .filter(r => r[1] && timeToMin(r[1]) >= nowMin)
-        .slice(0, 3);
+    const nextS = sData.filter(r => timeToMin(r[1]) >= nowMin).slice(0, 3);
 
     let html = '';
-    
-    if (nextS.length === 0) {
-        html = '<div class="info-msg">本日の対象時間の電車は<br>終了しました。</div>';
-    } else {
-        nextS.forEach(sRow => {
-            const [lineName, sDep, yArr] = sRow;
-            const yArrMin = timeToMin(yArr);
-            
-            // 有楽町着以降の武蔵野線を2本抽出
-            const nextT = tData
-                .filter(r => r[0] && timeToMin(r[0]) >= yArrMin)
-                .slice(0, 2);
+    nextS.forEach(sRow => {
+        const [lineName, sDep, yArr] = sRow;
+        const yArrMin = timeToMin(yArr);
+        const nextT = tData.filter(r => timeToMin(r[0]) >= yArrMin).slice(0, 2);
 
-            // 路線に応じたクラス（yamanote または keihintohoku）を取得
-            const lineClass = getLineClass(lineName);
+        // クラス判定
+        let lineClass = '';
+        if (lineName.includes('山手')) lineClass = 'yamanote';
+        if (lineName.includes('京浜東北')) lineClass = 'keihintohoku';
 
-            html += `
-            <div class="card ${lineClass}">
-                <div class="route-main">
-                    <span class="line-tag">${lineName}</span>
-                    <div class="time-group">
-                        <div class="time-box"><span class="time-label">品川</span><span class="time-display">${sDep}</span></div>
-                        <span class="arrow">→</span>
-                        <div class="time-box"><span class="time-label">有楽町</span><span class="time-display">${yArr}</span></div>
-                    </div>
+        html += `
+        <div class="card ${lineClass}">
+            <div class="route-main">
+                <span class="line-tag">${lineName}</span>
+                <div class="time-row">
+                    <span><small class="station-name">品川</small>${sDep}</span>
+                    <span class="arrow">→</span>
+                    <span><small class="station-name">有楽町</small>${yArr}</span>
                 </div>
-                <div class="musashino-section">
-                    ${nextT.map((tRow, idx) => {
-                        const wait = timeToMin(tRow[0]) - yArrMin;
-                        return `
-                        <div class="musashino-box">
-                            <span class="wait-label">東京${idx + 1} (<span class="wait-min">${wait}分</span>待ち)</span>
-                            <span class="musashino-time">${tRow[0]}</span>
-                            <span class="dest-label">${tRow[1]}行</span>
-                        </div>`;
-                    }).join('')}
-                    ${nextT.length === 0 ? '<div class="musashino-box">接続なし</div>' : ''}
-                    ${nextT.length === 1 ? '<div class="musashino-box" style="visibility:hidden"></div>' : ''}
-                </div>
-            </div>`;
-        });
-    }
+            </div>
+            <div class="musashino-section">
+                ${nextT.map((tRow, idx) => {
+                    const wait = timeToMin(tRow[0]) - yArrMin;
+                    return `
+                    <div class="musashino-box">
+                        <span class="wait-label">東京${idx+1} (${wait}分)</span>
+                        <span class="musashino-time">${tRow[0]}</span>
+                        <span class="dest-label">${tRow[1]}行</span>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>`;
+    });
 
-    document.getElementById('result').innerHTML = html;
+    document.getElementById('result').innerHTML = html || '<div class="info-msg">電車がありません</div>';
 }
 
 init();
