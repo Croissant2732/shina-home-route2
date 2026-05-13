@@ -5,13 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>帰宅ナビ</title>
     
-    <!-- ★ここを追加：スマホのホーム画面用アイコン設定★ -->
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" href="icon.png">
     
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 10px; color: #333; margin: 0; }
+        /* 全体の背景にトランジションを追加して色の変化を滑らかに */
+        body { 
+            font-family: -apple-system, sans-serif; 
+            background: #f0f2f5; 
+            padding: 10px; 
+            color: #333; 
+            margin: 0; 
+            transition: background-color 0.3s ease;
+            cursor: pointer; /* タップ可能であることを示す */
+        }
         
+        /* 更新停止中の背景色 */
+        body.paused {
+            background-color: #d1d5db; /* 少し暗いグレー */
+        }
+
         .header { 
             display: flex; 
             justify-content: space-between; 
@@ -19,6 +32,20 @@
             margin: 10px 5px 15px 5px; 
         }
         h2 { font-size: 18px; margin: 0; font-weight: bold; }
+
+        /* 停止中であることがわかるバッジ */
+        #status-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            display: none;
+            background: #666;
+            color: #fff;
+            vertical-align: middle;
+        }
+        body.paused #status-badge { display: inline; }
+
         #clock { font-family: monospace; font-size: 16px; font-weight: bold; color: #555; background: #fff; padding: 4px 8px; border-radius: 6px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
 
         #result { display: flex; flex-direction: column; gap: 12px; }
@@ -77,7 +104,6 @@
             text-align: center; 
         }
 
-        /* ★待ち時間のスタイル修正：黒色・太字★ */
         .wait-label { font-size: 10px; color: #666; display: block; margin-bottom: 2px; }
         .wait-time-bold { color: #000; font-weight: bold; font-size: 12px; }
 
@@ -87,10 +113,10 @@
         .info-msg { text-align: center; color: #888; margin-top: 30px; }
     </style>
 </head>
-<body>
+<body onclick="togglePause()">
 
 <div class="header">
-    <h2>帰宅経路案内</h2>
+    <h2>帰宅経路案内<span id="status-badge">一時停止中</span></h2>
     <div id="clock">00:00:00</div>
 </div>
 
@@ -99,6 +125,18 @@
 <script>
 let shinagawaData = [];
 let tokyoData = [];
+let isPaused = false; // 停止状態を管理するフラグ
+
+// 画面クリック時の処理
+function togglePause() {
+    isPaused = !isPaused;
+    if (isPaused) {
+        document.body.classList.add('paused');
+    } else {
+        document.body.classList.remove('paused');
+        updateDisplay(); // 再開時に即座に最新時刻で更新
+    }
+}
 
 async function loadCSV(file) {
     try {
@@ -115,6 +153,9 @@ function timeToMin(timeStr) {
 }
 
 function updateDisplay() {
+    // 停止中なら時計の更新も案内更新もスキップ
+    if (isPaused) return;
+
     const now = new Date();
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
@@ -165,6 +206,7 @@ function updateDisplay() {
 }
 
 async function init() {
+    // 実際にはCSVファイルが必要なため、存在しない場合は空データで動くようにしています
     shinagawaData = await loadCSV('shinagawa_yurakucho.csv');
     tokyoData = await loadCSV('tokyo_musashino.csv');
     setInterval(updateDisplay, 1000);
